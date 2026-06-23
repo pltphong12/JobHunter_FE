@@ -1,48 +1,31 @@
-import { FooterToolbar, ModalForm, ProCard, ProFormSwitch, ProFormText, ProFormTextArea } from "@ant-design/pro-components";
+import { FooterToolbar, ModalForm, ProFormSwitch, ProFormText, ProFormTextArea } from "@ant-design/pro-components";
 import { Col, Form, Row, message, notification } from "antd";
 import { isMobile } from 'react-device-detect';
-import { callCreateRole, callFetchPermission, callUpdateRole } from "@/config/api";
-import { IPermission, IRole } from "@/types/backend";
+import { callCreateRole, callUpdateRole } from "@/config/api";
+import { IRole } from "@/types/backend";
 import { CheckSquareOutlined } from "@ant-design/icons";
-import ModuleApi from "./module.api";
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { resetSingleRole } from "@/redux/slice/roleSlide";
-import { groupByPermission } from "@/config/utils";
+import { useAppDispatch } from "@/redux/hooks";
 
 interface IProps {
     openModal: boolean;
     setOpenModal: (v: boolean) => void;
     reloadTable: () => void;
-    listPermissions: {
-        module: string;
-        permissions: IPermission[]
-    }[];
     singleRole: IRole | null;
     setSingleRole: (v: any) => void;
 }
 
 const ModalRole = (props: IProps) => {
-    const { openModal, setOpenModal, reloadTable, listPermissions, singleRole, setSingleRole } = props;
+    const { openModal, setOpenModal, reloadTable, singleRole, setSingleRole } = props;
     const dispatch = useAppDispatch();
     const [form] = Form.useForm();
 
     const submitRole = async (valuesForm: any) => {
-        const { description, active, name, permissions } = valuesForm;
-        const checkedPermissions = [];
-
-        if (permissions) {
-            for (const key in permissions) {
-                if (key.match(/^[1-9][0-9]*$/) && permissions[key] === true) {
-                    checkedPermissions.push({ id: key });
-                }
-            }
-        }
+        const { description, active, name } = valuesForm;
 
         if (singleRole?.id) {
             //update
             const role = {
-                name, description, active, permissions: checkedPermissions
+                name, description, active
             }
             const res = await callUpdateRole(role, singleRole.id);
             if (res.data) {
@@ -58,7 +41,7 @@ const ModalRole = (props: IProps) => {
         } else {
             //create
             const role = {
-                name, description, active, permissions: checkedPermissions
+                name, description, active
             }
             const res = await callCreateRole(role);
             if (res.data) {
@@ -98,6 +81,11 @@ const ModalRole = (props: IProps) => {
                 preserve={false}
                 form={form}
                 onFinish={submitRole}
+                initialValues={singleRole?.id ? {
+                    name: singleRole.name,
+                    active: singleRole.active,
+                    description: singleRole.description,
+                } : undefined}
                 submitter={{
                     render: (_: any, dom: any) => <FooterToolbar>{dom}</FooterToolbar>,
                     submitButtonProps: {
@@ -143,26 +131,6 @@ const ModalRole = (props: IProps) => {
                                 autoSize: { minRows: 2 }
                             }}
                         />
-                    </Col>
-                    <Col span={24}>
-                        <ProCard
-                            title="Quyền hạn"
-                            subTitle="Các quyền hạn được phép cho vai trò này"
-                            headStyle={{ color: '#d81921' }}
-                            style={{ marginBottom: 20 }}
-                            headerBordered
-                            size="small"
-                            bordered
-                        >
-                            <ModuleApi
-                                form={form}
-                                listPermissions={listPermissions}
-                                singleRole={singleRole}
-                                openModal={openModal}
-                            />
-
-                        </ProCard>
-
                     </Col>
                 </Row>
             </ModalForm>

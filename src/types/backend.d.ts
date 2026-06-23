@@ -24,13 +24,6 @@ export interface IAccount {
         role: {
             id: string;
             name: string;
-            permissions: {
-                id: string;
-                name: string;
-                apiPath: string;
-                method: string;
-                module: string;
-            }[]
         }
     }
 }
@@ -138,27 +131,13 @@ export interface IResume {
     updatedAt?: string;
 }
 
-export interface IPermission {
-    id?: string;
-    name?: string;
-    apiPath?: string;
-    method?: string;
-    module?: string;
 
-    createdBy?: string;
-    isDeleted?: boolean;
-    deletedAt?: boolean | null;
-    createdAt?: string;
-    updatedAt?: string;
-
-}
 
 export interface IRole {
     id?: string;
     name: string;
     description: string;
     active: boolean;
-    permissions: IPermission[] | string[];
 
     createdBy?: string;
     isDeleted?: boolean;

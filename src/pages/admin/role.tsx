@@ -1,19 +1,16 @@
 import DataTable from "@/components/client/data-table";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { IPermission, IRole } from "@/types/backend";
+import { IRole } from "@/types/backend";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, Popconfirm, Space, Tag, message, notification } from "antd";
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import dayjs from 'dayjs';
-import { callDeleteRole, callFetchPermission } from "@/config/api";
+import { callDeleteRole } from "@/config/api";
 import queryString from 'query-string';
 import { fetchRole } from "@/redux/slice/roleSlide";
 import ModalRole from "@/components/admin/role/modal.role";
-import { ALL_PERMISSIONS } from "@/config/permissions";
-import Access from "@/components/share/access";
 import { sfLike } from "spring-filter-query-builder";
-import { groupByPermission } from "@/config/utils";
 
 const RolePage = () => {
     const [openModal, setOpenModal] = useState<boolean>(false);
@@ -25,26 +22,8 @@ const RolePage = () => {
     const roles = useAppSelector(state => state.role.result);
     const dispatch = useAppDispatch();
 
-
-    //all backend permissions
-    const [listPermissions, setListPermissions] = useState<{
-        module: string;
-        permissions: IPermission[]
-    }[] | null>(null);
-
     //current role
     const [singleRole, setSingleRole] = useState<IRole | null>(null);
-
-    useEffect(() => {
-        const init = async () => {
-            const res = await callFetchPermission(`page=1&size=100`);
-            if (res.data?.result) {
-                setListPermissions(groupByPermission(res.data?.result))
-            }
-        }
-        init();
-    }, [])
-
 
     const handleDeleteRole = async (id: string | undefined) => {
         if (id) {
@@ -127,44 +106,34 @@ const RolePage = () => {
             width: 50,
             render: (_value, entity, _index, _action) => (
                 <Space>
-                    <Access
-                        permission={ALL_PERMISSIONS.ROLES.UPDATE}
-                        hideChildren
+                    <EditOutlined
+                        style={{
+                            fontSize: 20,
+                            color: '#ffa500',
+                        }}
+                        type=""
+                        onClick={() => {
+                            setSingleRole(entity);
+                            setOpenModal(true);
+                        }}
+                    />
+                    <Popconfirm
+                        placement="leftTop"
+                        title={"Xác nhận xóa role"}
+                        description={"Bạn có chắc chắn muốn xóa role này ?"}
+                        onConfirm={() => handleDeleteRole(entity.id)}
+                        okText="Xác nhận"
+                        cancelText="Hủy"
                     >
-                        <EditOutlined
-                            style={{
-                                fontSize: 20,
-                                color: '#ffa500',
-                            }}
-                            type=""
-                            onClick={() => {
-                                setSingleRole(entity);
-                                setOpenModal(true);
-                            }}
-                        />
-                    </Access>
-                    <Access
-                        permission={ALL_PERMISSIONS.ROLES.DELETE}
-                        hideChildren
-                    >
-                        <Popconfirm
-                            placement="leftTop"
-                            title={"Xác nhận xóa role"}
-                            description={"Bạn có chắc chắn muốn xóa role này ?"}
-                            onConfirm={() => handleDeleteRole(entity.id)}
-                            okText="Xác nhận"
-                            cancelText="Hủy"
-                        >
-                            <span style={{ cursor: "pointer", margin: "0 10px" }}>
-                                <DeleteOutlined
-                                    style={{
-                                        fontSize: 20,
-                                        color: '#ff4d4f',
-                                    }}
-                                />
-                            </span>
-                        </Popconfirm>
-                    </Access>
+                        <span style={{ cursor: "pointer", margin: "0 10px" }}>
+                            <DeleteOutlined
+                                style={{
+                                    fontSize: 20,
+                                    color: '#ff4d4f',
+                                }}
+                            />
+                        </span>
+                    </Popconfirm>
                 </Space>
             ),
 
@@ -208,49 +177,44 @@ const RolePage = () => {
 
     return (
         <div>
-            <Access
-                permission={ALL_PERMISSIONS.ROLES.GET_PAGINATE}
-            >
-                <DataTable<IRole>
-                    actionRef={tableRef}
-                    headerTitle="Danh sách Roles (Vai Trò)"
-                    rowKey="id"
-                    loading={isFetching}
-                    columns={columns}
-                    dataSource={roles}
-                    request={async (params, sort, filter): Promise<any> => {
-                        const query = buildQuery(params, sort, filter);
-                        dispatch(fetchRole({ query }))
-                    }}
-                    scroll={{ x: true }}
-                    pagination={
-                        {
-                            current: meta.page,
-                            pageSize: meta.pageSize,
-                            showSizeChanger: true,
-                            total: meta.total,
-                            showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
-                        }
+            <DataTable<IRole>
+                actionRef={tableRef}
+                headerTitle="Danh sách Roles (Vai Trò)"
+                rowKey="id"
+                loading={isFetching}
+                columns={columns}
+                dataSource={roles}
+                request={async (params, sort, filter): Promise<any> => {
+                    const query = buildQuery(params, sort, filter);
+                    dispatch(fetchRole({ query }))
+                }}
+                scroll={{ x: true }}
+                pagination={
+                    {
+                        current: meta.page,
+                        pageSize: meta.pageSize,
+                        showSizeChanger: true,
+                        total: meta.total,
+                        showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
                     }
-                    rowSelection={false}
-                    toolBarRender={(_action, _rows): any => {
-                        return (
-                            <Button
-                                icon={<PlusOutlined />}
-                                type="primary"
-                                onClick={() => setOpenModal(true)}
-                            >
-                                Thêm mới
-                            </Button>
-                        );
-                    }}
-                />
-            </Access>
+                }
+                rowSelection={false}
+                toolBarRender={(_action, _rows): any => {
+                    return (
+                        <Button
+                            icon={<PlusOutlined />}
+                            type="primary"
+                            onClick={() => setOpenModal(true)}
+                        >
+                            Thêm mới
+                        </Button>
+                    );
+                }}
+            />
             <ModalRole
                 openModal={openModal}
                 setOpenModal={setOpenModal}
                 reloadTable={reloadTable}
-                listPermissions={listPermissions!}
                 singleRole={singleRole}
                 setSingleRole={setSingleRole}
             />

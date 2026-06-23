@@ -18,7 +18,7 @@ import HomePage from 'pages/home';
 import styles from 'styles/app.module.scss';
 import DashboardPage from './pages/admin/dashboard';
 import CompanyPage from './pages/admin/company';
-import PermissionPage from './pages/admin/permission';
+
 import ResumePage from './pages/admin/resume';
 import RolePage from './pages/admin/role';
 import UserPage from './pages/admin/user';
@@ -129,13 +129,7 @@ export default function App() {
               <ResumePage />
             </ProtectedRoute>
         },
-        {
-          path: "permission",
-          element:
-            <ProtectedRoute>
-              <PermissionPage />
-            </ProtectedRoute>
-        },
+
         {
           path: "role",
           element:

@@ -47,7 +47,6 @@ const initialState: IState = {
         name: "",
         description: "",
         active: false,
-        permissions: []
     }
 };
 
@@ -64,7 +63,6 @@ export const roleSlide = createSlice({
                 name: "",
                 description: "",
                 active: false,
-                permissions: []
             }
         },
 
@@ -101,7 +99,6 @@ export const roleSlide = createSlice({
                 name: "",
                 description: "",
                 active: false,
-                permissions: []
             }
             // Add user to the state array
             // state.courseOrder = action.payload;
@@ -114,7 +111,6 @@ export const roleSlide = createSlice({
                 name: "",
                 description: "",
                 active: false,
-                permissions: []
             }
             // Add user to the state array
             // state.courseOrder = action.payload;
